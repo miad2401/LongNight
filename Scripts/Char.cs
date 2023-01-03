@@ -4,6 +4,7 @@ using System;
 public class Char : Node2D
 {
 	[Signal] public delegate void TurnHandler(bool hAction);
+	[Signal] public delegate void changeText(Node toChange, String text);
 	
 	public bool hasAction = true;
 	[Export] public int numOfActions = 2;
@@ -12,9 +13,9 @@ public class Char : Node2D
 	private bool canMove = true;
 	Vector2 enemyPos;
 
-	private int hp;
-	private int def;
-	private int pow;
+	[Export] private int hp = 10;
+	[Export] private int def = 5;
+	[Export] private int agi = 5;
 
 	Texture B11;
 	Texture B12;
@@ -27,8 +28,9 @@ public class Char : Node2D
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
 	{
-		//Connect to turn handler
+		//Connect signals
 		Connect(nameof(TurnHandler), GetNode("/root/Scene"), "turnHandler");
+		Connect(nameof(changeText), GetNode("/root/Scene/Char/Camera2D/Control"), "setText");
 
 		//Load all character textures
 		B11 = GD.Load<Texture>("res://Resources/Characters/Body/B1-1.png");
@@ -37,16 +39,12 @@ public class Char : Node2D
 		H12 = GD.Load<Texture>("res://Resources/Characters/Heads/H1-2.png");
 		L11 = GD.Load<Texture>("res://Resources/Characters/Legs/L1-1.png");
 
-		//Set basic stats
-		hp = 10;
-		def = 5;
-		pow = 5;
-
 		//Generate character
 		generateChar();
 	}
 	
 	//Handles all the input for the character
+	//TODO: Add attack and defend actions
 	public override void _Input(InputEvent inputEvent){
 		enemy = GetNode<Node2D>("/root/Scene/Enemy");
 		enemyPos = enemy.GlobalPosition;
@@ -126,9 +124,9 @@ public class Char : Node2D
 			}
 		}
 	}
-//  // Called every frame. 'delta' is the elapsed time since the previous frame.
-	public override void _Process(float delta)
-	{   
+	
+	// Called every frame. 'delta' is the elapsed time since the previous frame.
+	public override void _Process(float delta){   
 		
 	}
 	
@@ -149,28 +147,44 @@ public class Char : Node2D
 		int bodyChoice = rnd.Next(1, 3);
 		int legsChoice = rnd.Next(1, 3);
 		
+
+		//TODO: Add traits
 		switch(headChoice){
 			case 1:
 				head.Texture = H11;
+				hp += 2;
 				break;
 			case 2:
 				head.Texture = H12;
+				hp += 1;
 				break;
 		}
 		
 		switch(bodyChoice){
 			case 1:
 				body.Texture = B11;
+				def -= 1;
 				break;				
 			case 2:
 				body.Texture = B12;
+				def += 1;
 				break;
 		}
 		
 		switch(legsChoice){
 			case 1:
 				legs.Texture = L11;
+				agi += 1;
 				break;
 		}
+		
+		updateStats();
+	}
+	
+	//Update stats
+	public void updateStats(){
+		Label stats = GetNode<Label>("/root/Scene/Char/Camera2D/Control/TopBar/Stats");
+		String statsText = "==========Stats===========\nHP: " + hp + "\nDEF: " + def + "\nAGI: " + agi;
+		EmitSignal(nameof(changeText), stats, statsText);
 	}
 }

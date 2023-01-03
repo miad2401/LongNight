@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=2]
+[gd_scene load_steps=10 format=2]
 
 [ext_resource path="res://Resources/Tileset/BaseTileset.tres" type="TileSet" id=1]
 [ext_resource path="res://Resources/Characters/Body/B1-1.png" type="Texture" id=2]
@@ -7,6 +7,8 @@
 [ext_resource path="res://Resources/Characters/Enemy-Orb.png" type="Texture" id=5]
 [ext_resource path="res://Resources/Characters/Heads/H1-1.png" type="Texture" id=6]
 [ext_resource path="res://Resources/Characters/Legs/L1-1.png" type="Texture" id=7]
+[ext_resource path="res://Scenes/UI.tscn" type="PackedScene" id=8]
+[ext_resource path="res://Scripts/UI.cs" type="Script" id=9]
 
 [node name="Scene" type="Node2D"]
 script = ExtResource( 4 )
@@ -16,6 +18,8 @@ z_index = -2
 mode = 1
 tile_set = ExtResource( 1 )
 cell_size = Vector2( 128, 64 )
+show_collision = true
+collision_use_kinematic = true
 format = 1
 tile_data = PoolIntArray( -327680, 6, 0, -327679, 6, 0, -196609, 6, 0, -262144, 6, 0, -262143, 6, 0, -262142, 6, 0, -262141, 6, 0, -131074, 6, 0, -131073, 6, 0, -196608, 6, 0, -196607, 6, 0, -196606, 6, 0, -196605, 6, 0, -196604, 6, 0, -65539, 6, 0, -65538, 6, 0, -65537, 6, 0, -131072, 6, 0, -131071, 6, 0, -131070, 6, 0, -131069, 6, 0, -131068, 6, 0, -4, 6, 0, -3, 6, 0, -2, 6, 0, -1, 6, 0, -65536, 6, 0, -65535, 6, 0, -65534, 6, 0, -65533, 6, 0, -65532, 6, 0, -65531, 6, 0, 65532, 6, 0, 65533, 6, 0, 65534, 6, 0, 65535, 6, 0, 0, 6, 0, 1, 6, 0, 2, 6, 0, 3, 6, 0, 4, 6, 0, 5, 6, 0, 131069, 6, 0, 131070, 6, 0, 131071, 6, 0, 65536, 6, 0, 65537, 6, 0, 65538, 6, 0, 65539, 6, 0, 65540, 6, 0, 65541, 6, 0, 196606, 6, 0, 196607, 6, 0, 131072, 6, 0, 131073, 6, 0, 131074, 6, 0, 131075, 6, 0, 131076, 6, 0, 262143, 6, 0, 196608, 6, 0, 196609, 6, 0, 196610, 6, 0, 196611, 6, 0, 196612, 6, 0, 262144, 6, 0, 262145, 6, 0, 262146, 6, 0 )
 
@@ -44,6 +48,17 @@ z_index = 1
 position = Vector2( -1, -57 )
 texture = ExtResource( 7 )
 
+[node name="Camera2D" type="Camera2D" parent="Char"]
+position = Vector2( 0, -47 )
+current = true
+
+[node name="Control" parent="Char/Camera2D" instance=ExtResource( 8 )]
+margin_left = -512.0
+margin_top = -301.0
+margin_right = -512.0
+margin_bottom = -301.0
+script = ExtResource( 9 )
+
 [node name="Enemy" type="Node2D" parent="."]
 position = Vector2( 64, 128 )
 z_index = 2
@@ -52,14 +67,3 @@ z_index = 2
 position = Vector2( 0, -48 )
 scale = Vector2( 3, 3 )
 texture = ExtResource( 5 )
-
-[node name="Camera2D" type="Camera2D" parent="."]
-position = Vector2( 61, 48 )
-current = true
-zoom = Vector2( 0.5, 0.5 )
-
-[node name="UI" type="Control" parent="."]
-margin_left = 371.0
-margin_top = -25.0
-margin_right = 881.0
-margin_bottom = 272.0
