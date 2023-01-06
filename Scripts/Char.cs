@@ -5,7 +5,7 @@ public class Char : Node2D
 {
 	[Signal] public delegate void TurnHandler(bool hAction);
 	[Signal] public delegate void changeText(Node toChange, String text);
-	
+
 	public bool hasAction = true;
 	[Export] public int numOfActions = 2;
 	
@@ -45,6 +45,7 @@ public class Char : Node2D
 	
 	//Handles all the input for the character
 	//TODO: Add attack and defend actions
+	//TODO: handle multiple enemies
 	public override void _Input(InputEvent inputEvent){
 		enemy = GetNode<Node2D>("/root/Scene/Enemy");
 		enemyPos = enemy.GlobalPosition;
@@ -152,24 +153,26 @@ public class Char : Node2D
 		switch(headChoice){
 			case 1:
 				head.Texture = H11;
+				body.Texture = B11;
+				def -= 1;
 				hp += 2;
 				break;
 			case 2:
 				head.Texture = H12;
+				body.Texture = B12;
+				def += 1;
 				hp += 1;
 				break;
 		}
 		
-		switch(bodyChoice){
-			case 1:
-				body.Texture = B11;
-				def -= 1;
-				break;				
-			case 2:
-				body.Texture = B12;
-				def += 1;
-				break;
-		}
+		//switch(bodyChoice){
+			//case 1:
+				
+				//break;				
+			//case 2:
+				
+				//break;
+		//}
 		
 		switch(legsChoice){
 			case 1:
@@ -186,5 +189,26 @@ public class Char : Node2D
 		Label stats = GetNode<Label>("/root/Scene/Char/Camera2D/Control/TopBar/Stats");
 		String statsText = "==========Stats===========\nHP: " + hp + "\nDEF: " + def + "\nAGI: " + agi;
 		EmitSignal(nameof(changeText), stats, statsText);
+	}
+
+	public void takeDamage(int amount)
+	{
+		Label combatLog = GetNode<Label>("/root/Scene/Char/Camera2D/Control/TopBar/CombatLog");
+		Random rnd = new Random();
+
+		rnd.Next(1, agi);
+		if (rnd.Next(1, agi) > (agi / 2))
+		{
+			amount -= def;
+			if (amount > 0)
+			{
+				EmitSignal(nameof(changeText), combatLog, "Combat Log: \nHit!");
+				hp -= amount;
+			} else
+			{
+				EmitSignal(nameof(changeText), combatLog, "Combat Log: \nMiss!");
+			}
+		}
+		updateStats();
 	}
 }

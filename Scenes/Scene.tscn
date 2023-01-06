@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=2]
+[gd_scene load_steps=11 format=2]
 
 [ext_resource path="res://Resources/Tileset/BaseTileset.tres" type="TileSet" id=1]
 [ext_resource path="res://Resources/Characters/Body/B1-1.png" type="Texture" id=2]
@@ -9,6 +9,7 @@
 [ext_resource path="res://Resources/Characters/Legs/L1-1.png" type="Texture" id=7]
 [ext_resource path="res://Scenes/UI.tscn" type="PackedScene" id=8]
 [ext_resource path="res://Scripts/UI.cs" type="Script" id=9]
+[ext_resource path="res://Scripts/EnemyHandler.cs" type="Script" id=10]
 
 [node name="Scene" type="Node2D"]
 script = ExtResource( 4 )
@@ -59,9 +60,10 @@ margin_right = -512.0
 margin_bottom = -301.0
 script = ExtResource( 9 )
 
-[node name="Enemy" type="Node2D" parent="."]
+[node name="Enemy" type="Node2D" parent="." groups=["Enemy"]]
 position = Vector2( 64, 128 )
 z_index = 2
+script = ExtResource( 10 )
 
 [node name="Enemy-Orb" type="Sprite" parent="Enemy"]
 position = Vector2( 0, -48 )

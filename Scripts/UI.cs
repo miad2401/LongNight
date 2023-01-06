@@ -15,6 +15,6 @@ public class UI : Control
 
 	public void setText(Label toChange, String text) {
 		toChange.Text = text;
-		GD.Print("set text reached");
+		GD.Print("set text reached | " + toChange.Name + " | ");
 	}
 }
