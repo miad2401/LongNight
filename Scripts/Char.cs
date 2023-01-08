@@ -17,6 +17,9 @@ public class Char : Node2D
 	[Export] private int def = 5;
 	[Export] private int agi = 5;
 
+	PackedScene Lose;
+	PackedScene Win;
+
 	Texture B11;
 	Texture B12;
 	Texture B13;
@@ -24,6 +27,28 @@ public class Char : Node2D
 	Texture H12;
 	Texture H13;
 	Texture L11;
+	Texture L12;
+	Texture L13;
+
+	Texture B21;
+	Texture B22;
+	Texture B23;
+	Texture H21;
+	Texture H22;
+	Texture H23;
+	Texture L21;
+	Texture L22;
+	Texture L23;
+
+	Texture B31;
+	Texture B32;
+	Texture B33;
+	Texture H31;
+	Texture H32;
+	Texture H33;
+	Texture L31;
+	Texture L32;
+	Texture L33;
 
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
@@ -35,9 +60,35 @@ public class Char : Node2D
 		//Load all character textures
 		B11 = GD.Load<Texture>("res://Resources/Characters/Body/B1-1.png");
 		B12 = GD.Load<Texture>("res://Resources/Characters/Body/B1-2.png");
-		H11 = GD.Load<Texture>("res://Resources/Characters/Heads/H1-1.png");
-		H12 = GD.Load<Texture>("res://Resources/Characters/Heads/H1-2.png");
-		L11 = GD.Load<Texture>("res://Resources/Characters/Legs/L1-1.png");
+		B13 = GD.Load<Texture>("res://Resources/Characters/Body/B1-3.png");
+		H11 = GD.Load<Texture>("res://Resources/Characters/Heads/A1-1.png");
+		H12 = GD.Load<Texture>("res://Resources/Characters/Heads/A1-2.png");
+		H13 = GD.Load<Texture>("res://Resources/Characters/Heads/A1-3.png");
+		L11 = GD.Load<Texture>("res://Resources/Characters/Legs/C1-1.png");
+		L12 = GD.Load<Texture>("res://Resources/Characters/Legs/C1-2.png");
+		L13 = GD.Load<Texture>("res://Resources/Characters/Legs/C1-3.png");
+
+		B21 = GD.Load<Texture>("res://Resources/Characters/Body/B2-1.png");
+		B22 = GD.Load<Texture>("res://Resources/Characters/Body/B2-2.png");
+		B23 = GD.Load<Texture>("res://Resources/Characters/Body/B2-3.png");
+		H21 = GD.Load<Texture>("res://Resources/Characters/Heads/A2-1.png");
+		H22 = GD.Load<Texture>("res://Resources/Characters/Heads/A2-2.png");
+		H23 = GD.Load<Texture>("res://Resources/Characters/Heads/A2-3.png");
+		L21 = GD.Load<Texture>("res://Resources/Characters/Legs/C2-1.png");
+		L22 = GD.Load<Texture>("res://Resources/Characters/Legs/C2-2.png");
+		L23 = GD.Load<Texture>("res://Resources/Characters/Legs/C2-3.png");
+
+		B31 = GD.Load<Texture>("res://Resources/Characters/Body/B3-1.png");
+		B32 = GD.Load<Texture>("res://Resources/Characters/Body/B3-2.png");
+		B33 = GD.Load<Texture>("res://Resources/Characters/Body/B3-3.png");
+		H31 = GD.Load<Texture>("res://Resources/Characters/Heads/A3-1.png");
+		H32 = GD.Load<Texture>("res://Resources/Characters/Heads/A3-2.png");
+		H33 = GD.Load<Texture>("res://Resources/Characters/Heads/A3-3.png");
+		L31 = GD.Load<Texture>("res://Resources/Characters/Legs/C3-1.png");
+		L32 = GD.Load<Texture>("res://Resources/Characters/Legs/C3-2.png");
+		L33 = GD.Load<Texture>("res://Resources/Characters/Legs/C3-3.png");
+
+		//Lose = GD.Load<PackedScene>("res://Resources/Scenes/Lose.tscn");
 
 		//Generate character
 		generateChar();
@@ -144,12 +195,9 @@ public class Char : Node2D
 		Sprite legs = GetNode<Sprite>("/root/Scene/Char/Legs/Legs");
 		
 		Random rnd = new Random();
-		int headChoice = rnd.Next(1, 3);//change to 10 when all sprites available
-		int bodyChoice = rnd.Next(1, 3);
-		int legsChoice = rnd.Next(1, 3);
+		int headChoice = rnd.Next(1, 10);//change to 10 when all sprites available
+		int legsChoice = rnd.Next(1, 4);
 		
-
-		//TODO: Add traits
 		switch(headChoice){
 			case 1:
 				head.Texture = H11;
@@ -163,21 +211,62 @@ public class Char : Node2D
 				def += 1;
 				hp += 1;
 				break;
+			case 3:
+				head.Texture = H13;
+				body.Texture = B13;
+				def -= 1;
+				hp += 1;
+				break;
+			case 4:
+				head.Texture = H21;
+				body.Texture = B21;
+				def += 2;
+				hp += 1;
+				break;
+			case 5:
+				head.Texture = H22;
+				body.Texture = B22;
+				def += 1;
+				hp += 2;
+				break;
+			case 6:
+				head.Texture = H23;
+				body.Texture = B23;
+				def += 1;
+				hp -= 1;
+				break;
+			case 7:
+				head.Texture = H31;
+				body.Texture = B31;
+				def += 1;
+				hp -= 2;
+				break;
+			case 8:
+				head.Texture = H32;
+				body.Texture = B32;
+				def -= 1;
+				hp -= 1;
+				break;
+			case 9:
+				head.Texture = H33;
+				body.Texture = B33;
+				def += 2;
+				hp -= 1;
+				break;
 		}
-		
-		//switch(bodyChoice){
-			//case 1:
-				
-				//break;				
-			//case 2:
-				
-				//break;
-		//}
 		
 		switch(legsChoice){
 			case 1:
 				legs.Texture = L11;
 				agi += 1;
+				break;
+			case 2:
+				legs.Texture = L21;
+				agi -= 1;
+				break;
+			case 3:
+				legs.Texture = L31;
+				agi += 2;
 				break;
 		}
 		
@@ -196,18 +285,22 @@ public class Char : Node2D
 		Label combatLog = GetNode<Label>("/root/Scene/Char/Camera2D/Control/TopBar/CombatLog");
 		Random rnd = new Random();
 
-		rnd.Next(1, agi);
-		if (rnd.Next(1, agi) > (agi / 2))
+		if (rnd.Next(1, agi) < (amount / 2))
 		{
 			amount -= def;
 			if (amount > 0)
 			{
-				EmitSignal(nameof(changeText), combatLog, "Combat Log: \nHit!");
+				EmitSignal(nameof(changeText), combatLog, "Combat Log: \n Enemy Hit!");
 				hp -= amount;
-			} else
-			{
-				EmitSignal(nameof(changeText), combatLog, "Combat Log: \nMiss!");
+				if (hp <= 0)
+				{
+					GetTree().ChangeSceneTo(Lose);
+				}
+			} else {
+				EmitSignal(nameof(changeText), combatLog, "Combat Log: \nEnemy Miss!");
 			}
+		} else {
+			EmitSignal(nameof(changeText), combatLog, "Combat Log: \nEnemy Miss!");
 		}
 		updateStats();
 	}

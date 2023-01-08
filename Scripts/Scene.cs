@@ -35,7 +35,6 @@ public class Scene : Node2D
 		}
 	}
 	
-	//TODO: Implement enemy turn
 	public void enemyTurn(){
 		if (turn){
 			GD.Print("enemy turn reached");

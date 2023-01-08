@@ -1,4 +1,8 @@
-[gd_resource type="DynamicFont" format=2]
+[gd_resource type="DynamicFont" load_steps=2 format=2]
+
+[ext_resource path="res://Resources/Roboto-Black.ttf" type="DynamicFontData" id=1]
 
 [resource]
-outline_size = 5
+size = 40
+extra_spacing_char = 4
+font_data = ExtResource( 1 )
