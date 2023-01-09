@@ -18,3 +18,6 @@ public class Menu : Control
 		GetTree().Quit();
 	}
 }
+
+
+

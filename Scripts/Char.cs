@@ -5,6 +5,8 @@ public class Char : Node2D
 {
 	[Signal] public delegate void TurnHandler(bool hAction);
 	[Signal] public delegate void changeText(Node toChange, String text);
+	[Signal] public delegate void attackEnemy(int roll);
+	//[Signal] public delegate void changeLoseText(int amount);
 
 	public bool hasAction = true;
 	[Export] public int numOfActions = 2;
@@ -12,10 +14,11 @@ public class Char : Node2D
 	private Node2D enemy;
 	private bool canMove = true;
 	Vector2 enemyPos;
+	public bool mode = false; //false = normal, true = infinite
 
 	[Export] private int hp = 10;
-	[Export] private int def = 5;
-	[Export] private int agi = 5;
+	[Export] private int def = 3;
+	[Export] private int agi = 2;
 
 	PackedScene Lose;
 	PackedScene Win;
@@ -50,12 +53,16 @@ public class Char : Node2D
 	Texture L32;
 	Texture L33;
 
+	int killCount;
+
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
 	{
 		//Connect signals
 		Connect(nameof(TurnHandler), GetNode("/root/Scene"), "turnHandler");
 		Connect(nameof(changeText), GetNode("/root/Scene/Char/Camera2D/Control"), "setText");
+		Connect(nameof(attackEnemy), GetNode("/root/Scene/Enemy"), "takeDamage");
+		//Connect(nameof(changeLoseText), GetNode("/root/Lose"), "setText");
 
 		//Load all character textures
 		B11 = GD.Load<Texture>("res://Resources/Characters/Body/B1-1.png");
@@ -89,6 +96,8 @@ public class Char : Node2D
 		L33 = GD.Load<Texture>("res://Resources/Characters/Legs/C3-3.png");
 
 		//Lose = GD.Load<PackedScene>("res://Resources/Scenes/Lose.tscn");
+		//Win = GD.Load<PackedScene>("res://Resources/Scenes/Win.tscn");
+		killCount = 0;
 
 		//Generate character
 		generateChar();
@@ -100,7 +109,9 @@ public class Char : Node2D
 	public override void _Input(InputEvent inputEvent){
 		enemy = GetNode<Node2D>("/root/Scene/Enemy");
 		enemyPos = enemy.GlobalPosition;
+		Sprite attackSprt = GetNode<Sprite>("/root/Scene/Char/Attack/Attack");
 		if (hasAction && Input.IsActionJustReleased("move_down")){
+			attackSprt.Texture = GD.Load<Texture>("res://Resources/Characters/AttackSlash-RightDown.png");
 			Vector2 pos = this.GlobalPosition;
 			if (!(enemyPos.x == pos.x + 64) || !(enemyPos.y == pos.y + 32)){
 				pos.x = pos.x + 64;
@@ -121,6 +132,7 @@ public class Char : Node2D
 		if (hasAction && Input.IsActionJustReleased("move_up"))
 		{
 			Vector2 pos = this.GlobalPosition;
+			attackSprt.Texture = GD.Load<Texture>("res://Resources/Characters/AttackSlash-LeftUp.png");
 			if (!(enemyPos.x == pos.x - 64) || !(enemyPos.y == pos.y - 32)){
 				pos.x = pos.x - 64;
 				pos.y = pos.y - 32;
@@ -140,6 +152,7 @@ public class Char : Node2D
 		if (hasAction && Input.IsActionJustReleased("move_right"))
 		{
 			Vector2 pos = this.GlobalPosition;
+			attackSprt.Texture = GD.Load<Texture>("res://Resources/Characters/AttackSlash-RightDown.png");
 			if (!(enemyPos.x == pos.x + 64) || !(enemyPos.y == pos.y - 32)){
 				pos.x = pos.x + 64;
 				pos.y = pos.y - 32;
@@ -159,6 +172,7 @@ public class Char : Node2D
 		if (hasAction && Input.IsActionJustReleased("move_left"))
 		{
 			Vector2 pos = this.GlobalPosition;
+			attackSprt.Texture = GD.Load<Texture>("res://Resources/Characters/AttackSlash-LeftUp.png");
 			if (!(enemyPos.x == pos.x - 64) || !(enemyPos.y == pos.y + 32)){
 				pos.x = pos.x - 64;
 				pos.y = pos.y + 32;
@@ -175,8 +189,59 @@ public class Char : Node2D
 				GD.Print("Cannot move left");
 			}
 		}
+
+		if (hasAction && Input.IsActionJustReleased("player_attack"))
+		{
+			//Get position of character, get map, get position of mouse
+			Vector2 pos = this.GlobalPosition;
+			TileMap map = GetNode<TileMap>("/root/Scene/Base");
+			Vector2 mousePos = GetGlobalMousePosition();
+			Vector2 mousePosLocal = map.ToLocal(mousePos);
+			Vector2 playerPosLocal = map.ToLocal(pos);
+			Vector2 enemyPosLocal = map.ToLocal(enemyPos);
+
+			//Get Tilemap coords of all positions
+			Vector2 mouseTilePos = map.WorldToMap(mousePosLocal);
+			Vector2 playerTilePos = map.WorldToMap(playerPosLocal);
+			Vector2 enemyTilePos = map.WorldToMap(enemyPosLocal);
+
+			GD.Print("Mouse pos: " + mousePos + " | Mouse Cell: " + mouseTilePos);
+			GD.Print("Player pos: " + pos + " | Player Cell: " + playerTilePos);
+			GD.Print("Enemy pos: " + enemyPos + " | Enemy Cell: " + enemyTilePos);
+			//Check if the tile clicked is the tile the enemy is on and check if player is beside enemy
+			if (mouseTilePos == enemyTilePos && (enemyTilePos.x == playerTilePos.x -1 || enemyTilePos.x == playerTilePos.x + 1 || enemyTilePos.y == playerTilePos.y - 1 || enemyTilePos.y == playerTilePos.y + 1))
+			{
+				Attack();
+				numOfActions--;
+				if (numOfActions == 0)
+				{
+					hasAction = false;
+					EmitSignal(nameof(TurnHandler), hasAction);
+				}
+				else
+				{
+					GD.Print("Enemy pos:", enemyPos);
+					GD.Print("Player pos:", pos);
+					GD.Print("Cannot attack tile");
+				}
+			}
+		}
 	}
-	
+
+	public void Attack()
+	{
+		AnimationPlayer animPlayer = GetNode<AnimationPlayer>("/root/Scene/Char/Attack/AnimationPlayer");
+		Animation attackAnim = GD.Load<Animation>("res://Attack.tres");
+		animPlayer.Play(attackAnim.ResourceName);
+		Random rnd = new Random();
+		int roll = rnd.Next(1, 11);
+		GD.Print("Player Attack Roll: " + roll);
+		
+
+
+		EmitSignal(nameof(attackEnemy), roll);
+	}
+
 	// Called every frame. 'delta' is the elapsed time since the previous frame.
 	public override void _Process(float delta){   
 		
@@ -220,7 +285,7 @@ public class Char : Node2D
 			case 4:
 				head.Texture = H21;
 				body.Texture = B21;
-				def += 2;
+				def += 1;
 				hp += 1;
 				break;
 			case 5:
@@ -250,7 +315,7 @@ public class Char : Node2D
 			case 9:
 				head.Texture = H33;
 				body.Texture = B33;
-				def += 2;
+				def += 1;
 				hp -= 1;
 				break;
 		}
@@ -294,7 +359,8 @@ public class Char : Node2D
 				hp -= amount;
 				if (hp <= 0)
 				{
-					GetTree().ChangeSceneTo(Lose);
+					GetTree().ChangeSceneTo(GD.Load<PackedScene>("res://Scenes/Lose.tscn"));
+					//EmitSignal(nameof(changeLoseText), "You Lose\nKill count: " + killCount);
 				}
 			} else {
 				EmitSignal(nameof(changeText), combatLog, "Combat Log: \nEnemy Miss!");
@@ -303,5 +369,19 @@ public class Char : Node2D
 			EmitSignal(nameof(changeText), combatLog, "Combat Log: \nEnemy Miss!");
 		}
 		updateStats();
+	}
+
+	public void updateKillCount()
+	{
+		Label killCounter = GetNode<Label>("/root/Scene/Char/Camera2D/Control/TopBar/KillCount");
+		killCount++;
+		EmitSignal(nameof(changeText), killCounter, "Kill count: " + killCount);
+		//if (!mode)
+		//{
+		//	if (killCount == 4)
+		//	{
+		//		GetTree().ChangeSceneTo(GD.Load<PackedScene>("res://Scenes/Win.tscn"));
+		//	}
+		//}
 	}
 }

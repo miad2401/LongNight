@@ -3,21 +3,22 @@ using System;
 
 public class EnemyHandler : Node2D
 {
-	// Declare member variables here. Examples:
-	// private int a = 2;
-	// private string b = "text";
 
 	[Export] private int hp = 5;
-	[Export] private int def = 3;
-	[Export] private int agi = 2;
+	[Export] private int def = 2;
+	[Export] private int agi = 1;
 
 	[Signal] public delegate void attackPlayer(int roll);
+	[Signal] public delegate void changeText(Node toChange, String text);
+	[Signal] public delegate void enemyKilled();
 
 
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
 	{
 		Connect(nameof(attackPlayer), GetNode("/root/Scene/Char"), "takeDamage");
+		Connect(nameof(changeText), GetNode("/root/Scene/Char/Camera2D/Control"), "setText");
+		Connect(nameof(enemyKilled), GetNode("/root/Scene/Char"), "updateKillCount");
 	}
 
 //  // Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -84,5 +85,58 @@ public class EnemyHandler : Node2D
 		int roll = rnd.Next(1, 11);
 		GD.Print("Attack Roll: " + roll);
 		EmitSignal(nameof(attackPlayer), roll);
+	}
+
+	public void takeDamage(int amount)
+	{
+		Label combatLog = GetNode<Label>("/root/Scene/Char/Camera2D/Control/TopBar/CombatLog");
+		Random rnd = new Random();
+
+		if (rnd.Next(1, agi) < (amount / 2))
+		{
+			amount -= def;
+			if (amount > 0)
+			{
+				EmitSignal(nameof(changeText), combatLog, "Combat Log: \n Player Hit!");
+				hp -= amount;
+				if (hp <= 0)
+				{
+					EmitSignal(nameof(changeText), combatLog, "Combat Log: \n Enemy Respawning!");
+					
+					//Respawn at random location
+					Vector2 pos = this.GlobalPosition;
+					TileMap map = GetNode<TileMap>("/root/Scene/Base");
+
+					Vector2 enemyPosLocal = map.ToLocal(pos);
+					Vector2 enemyTilePos = map.WorldToMap(enemyPosLocal);
+					int randX = rnd.Next((int)enemyTilePos.x - 5, (int)enemyTilePos.x + 5);
+					int randY = rnd.Next((int)enemyTilePos.y - 5, (int)enemyTilePos.y + 5);
+					enemyTilePos.x = randX; enemyTilePos.y = randY;
+					enemyPosLocal = map.MapToWorld(enemyTilePos);
+					pos = map.ToGlobal(enemyPosLocal);
+					//normalize for iso grid
+					pos.y = pos.y + 32;
+					pos.x = pos.x + 64;
+
+					this.GlobalPosition = pos;
+					//Improve enemy stats
+					int rndHImprove = rnd.Next(0, 3);
+					int rndDImprove = rnd.Next(0, 3);
+					int rndAImprove = rnd.Next(0, 2);
+					hp += rndHImprove;
+					def += rndDImprove;
+					agi += rndAImprove;
+					EmitSignal(nameof(enemyKilled));
+				}
+			}
+			else
+			{
+				EmitSignal(nameof(changeText), combatLog, "Combat Log: \n Player Miss!");
+			}
+		}
+		else
+		{
+			EmitSignal(nameof(changeText), combatLog, "Combat Log: \n Player Miss!");
+		}
 	}
 }

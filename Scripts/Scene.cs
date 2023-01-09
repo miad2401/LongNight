@@ -6,7 +6,9 @@ public class Scene : Node2D
 {
 	Node2D player;
 	public bool turn = false; //false = player turn, true = enemy turn
-	// Called when the node enters the scene tree for the first time.
+
+	AudioStreamPlayer audio;
+
 	[Signal] public delegate void enemyTurnOver();
 	[Signal] public delegate void enemyTurnHandler();
 	[Signal] public delegate void changeText(Node toChange, String text);
@@ -17,12 +19,17 @@ public class Scene : Node2D
 		Connect(nameof(enemyTurnHandler), GetNode("/root/Scene/Enemy"), "turn");
 		Connect(nameof(changeText), GetNode("/root/Scene/Char/Camera2D/Control"), "setText");
 		player = GetNode<Node2D>("/root/Scene/Char");
+		audio = GetNode<AudioStreamPlayer>("/root/Scene/AudioStreamPlayer");
 	}
 
 	// Called every frame. 'delta' is the elapsed time since the previous frame.
 	public override void _Process(float delta)
 	{
 		player = GetNode<Node2D>("/root/Scene/Char");
+		if (!audio.Playing)
+		{
+			audio.Play();
+		}
 	}
 	
 	public void turnHandler(bool hasAction){

@@ -20,14 +20,12 @@ DEF:
 AGI:"
 
 [node name="Actions" type="Label" parent="TopBar"]
-margin_left = 390.0
-margin_top = 2.0
-margin_right = 614.0
-margin_bottom = 66.0
+margin_left = 364.0
+margin_right = 646.0
+margin_bottom = 65.0
 text = "===========Actions===========
-1. Move
-2. Attack
-3. Defend
+1. WSAD or Arrows to Move
+2. Click to attack, Must be adjacent to attack
 "
 
 [node name="CombatLog" type="Label" parent="TopBar"]
@@ -36,3 +34,10 @@ margin_top = 3.0
 margin_right = 897.0
 margin_bottom = 66.0
 text = "Combat Log:"
+
+[node name="KillCount" type="Label" parent="TopBar"]
+margin_left = 858.0
+margin_top = 2.0
+margin_right = 934.0
+margin_bottom = 16.0
+text = "Kill count: 0"
